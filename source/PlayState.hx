@@ -25,6 +25,9 @@ class PlayState extends FlxState
 
 	public static var extra:FlxSprite;
 
+	public var curSpeed:Int;
+	public var curPrice:Int;
+
 	// responsible for handling level stuff
 	public static var firstLevel:Bool;
 	public static var secondLevel:Bool;
@@ -36,16 +39,23 @@ class PlayState extends FlxState
 	public static var bgcolor:String;
 	public static var levelFolder:String;
 	public static var currLevelDone:Bool;
-	public static var levelRobots:Array<String>;
+	public static var levelRobots:FlxTypedGroup<Robot>;
 
 	// shit
 	public var shit:FlxSprite;
 
 	// level robots
-	public static var levelOneRobots:Array<String>; // <= loop through folder names as strings and load them
-	public static var levelTwoRobots:Array<String>;
-	public static var levelThirdRobots:Array<String>;
-	public static var levelFourthRobots:Array<String>;
+	public static var _levelOneRobots:Array<String>; // <= loop through folder names as strings and load them
+	public static var _levelTwoRobots:Array<String>;
+	public static var _levelThirdRobots:Array<String>;
+	public static var _levelFourthRobots:Array<String>;
+
+	// god some mercy please
+	public static var levelOneRobots:FlxTypedGroup<Robot>; // <= loop through folder names as strings and load them
+	public static var levelTwoRobots:FlxTypedGroup<Robot>;
+	public static var levelThirdRobots:FlxTypedGroup<Robot>;
+	public static var levelFourthRobots:FlxTypedGroup<Robot>;
+
 	public static var parentLevel:Int;
 
 	public var rectArea:FlxSprite;
@@ -54,13 +64,19 @@ class PlayState extends FlxState
 	{
 		super.create();
 
+		for (x in 0...3)
+		{
+			for (i in 1...4)
+			{
+				curSpeed += 4;
+				curPrice += 1000;
+				levelOneRobots.add(new Robot(curSpeed, 'robot1$i.png', curPrice));
+			}
+		}
+
 		// FlxG.debugger.visible = true;
 
-		shit = new FlxSprite(27, 5).loadGraphic("assets/images/level1/robot13.png", false, 18, 18, false);
-
 		firstLevel = true;
-
-		add(shit);
 
 		getPG();
 	}
@@ -84,16 +100,19 @@ class PlayState extends FlxState
 		// (UI.allUnits);
 		add(mainUI); // Next One
 
-		levelOneRobots = ["robot11.png", "robot12.png", "robot13.png", "robot14.png"];
-		levelTwoRobots = ["robot21.png", "robot22.png", "robot23.png", "robot24.png"];
-		levelThirdRobots = ["robot31.png", "robot32.png", "robot33.png", "robot34.png"];
-		levelFourthRobots = ["robot41.png", "robot42.png", "robot43.png", "robot44.png"];
+		_levelOneRobots = ["robot11.png", "robot12.png", "robot13.png", "robot14.png"];
+		_levelTwoRobots = ["robot21.png", "robot22.png", "robot23.png", "robot24.png"];
+		_levelThirdRobots = ["robot31.png", "robot32.png", "robot33.png", "robot34.png"];
+		_levelFourthRobots = ["robot41.png", "robot42.png", "robot43.png", "robot44.png"];
 	}
 
 	function mainLoop()
 	{
 		if (firstLevel)
 		{
+			FlxG.watch.addQuick("curSpeed", curSpeed);
+			FlxG.watch.addQuick("curPrice", curPrice);
+
 			robotMode = "Normal";
 			bgcolor = "Purple";
 			levelRobots = levelOneRobots;
