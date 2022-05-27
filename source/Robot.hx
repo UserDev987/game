@@ -8,6 +8,8 @@ import flixel.util.FlxColor;
 import flixel.util.FlxPath;
 import flixel.util.FlxTimer;
 
+using StringTools;
+
 class Robot extends FlxSprite
 {
 	var defPos:FlxPoint = new FlxPoint(27, 119);
@@ -35,15 +37,24 @@ class Robot extends FlxSprite
 
 		this.curRobotFolder = PlayState.levelFolder;
 
-		this.loadGraphic('assets/images/$curRobotFolder/$pathh', true, 18, 18);
+		pathh = _path;
+
+		if (pathh.contains("3") || pathh.contains("4"))
+		{
+			this.loadGraphic('assets/images/$curRobotFolder/$pathh', true, 27, 16);
+		}
+		else
+		{
+			this.loadGraphic('assets/images/$curRobotFolder/$pathh', true, 16, 16);
+		}
 
 		// this.makeGraphic(18, 18, FlxColor.WHITE);
+
+		FlxG.watch.addQuick("fullString", 'assets/images/$curRobotFolder/$pathh');
 
 		this.speed = speed;
 
 		price = _price;
-
-		pathh = _path;
 
 		this.spl = spl;
 
