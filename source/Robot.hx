@@ -19,29 +19,19 @@ class Robot extends FlxSprite
 
 	public static var price:Int;
 
+	public var touched:Dynamic;
+
 	public static var thisRobotMode:String;
 
 	public static var pathh:String;
 
 	public var _frames:Array<Int>;
 
+	public var hasEarnedCoin:Bool;
+
 	public function new(speed:Int, _path:String, _price:Int, ?spl:Int)
 	{
 		super(defPos.x, defPos.y); // Default at bottom left of the PG
-
-		switch (PlayState.robotMode)
-		{
-			case("Normal"):
-				thisRobotMode = "Normal";
-			case("Second"):
-				thisRobotMode = "Second";
-			case("Third"):
-				thisRobotMode = "Third";
-			case("Boss"):
-				thisRobotMode = "Boss";
-			case _:
-				return;
-		}
 
 		this.curRobotFolder = PlayState.levelFolder;
 
@@ -85,6 +75,15 @@ class Robot extends FlxSprite
 	}
 
 	function handleTouch() {}
+
+	public function earnCoin()
+	{
+		if (!hasEarnedCoin)
+		{
+			hasEarnedCoin = true;
+			PlayState.score++;
+		}
+	}
 
 	var animTimeTracker:Float = 0;
 	var curAnimIndex:Int = 0;
