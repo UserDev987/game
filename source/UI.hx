@@ -68,10 +68,13 @@ class UI extends FlxTypedGroup<FlxSprite>
 
 	function addBot()
 	{
-		var randomRobot:Int = new FlxRandom().int(1, 2);
-		var parent:Int = PlayState.parentLevel;
+		var randomRobot:Int = new FlxRandom().int(0, 3);
+		var realRandomRobot:String = PlayState.levelRobots[randomRobot];
 
-		allBoughtRobots.add(new Robot(50, 'robot11.png', 65));
+		allBoughtRobots.add(new Robot(50, realRandomRobot, 50));
+
+		trace(PlayState.levelRobots[randomRobot]);
+		trace(PlayState.levelFolder);
 
 		PlayState.currobotCount += 1;
 
