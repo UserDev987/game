@@ -5,6 +5,7 @@ import flixel.FlxG;
 import flixel.FlxObject;
 import flixel.FlxSprite;
 import flixel.FlxState;
+import flixel.group.FlxGroup.FlxTypedGroup;
 import flixel.math.FlxPoint;
 import flixel.util.FlxColor;
 
@@ -14,13 +15,15 @@ class PlayState extends FlxState
 
 	var mainUI:UI;
 
-	public var score:Int;
+	public static var score:Int;
 
 	var ball:Robot;
 
 	public static var currobotCount:Int;
 
 	public static var test:FlxSprite;
+
+	public static var extra:FlxSprite;
 
 	// responsible for handling level stuff
 	public static var firstLevel:Bool;
@@ -35,6 +38,9 @@ class PlayState extends FlxState
 	public static var currLevelDone:Bool;
 	public static var levelRobots:Array<String>;
 
+	// shit
+	public var shit:FlxSprite;
+
 	// level robots
 	public static var levelOneRobots:Array<String>; // <= loop through folder names as strings and load them
 	public static var levelTwoRobots:Array<String>;
@@ -42,37 +48,46 @@ class PlayState extends FlxState
 	public static var levelFourthRobots:Array<String>;
 	public static var parentLevel:Int;
 
+	public var rectArea:FlxSprite;
+
 	override public function create()
 	{
 		super.create();
 
 		// FlxG.debugger.visible = true;
 
+		shit = new FlxSprite(27, 5).loadGraphic("assets/images/level1/robot13.png", false, 18, 18, false);
+
 		firstLevel = true;
+
+		add(shit);
 
 		getPG();
 	}
 
 	function getPG()
 	{
-		levelOneRobots = ["robot11", "robot12"];
-		levelTwoRobots = ["robot21", "robot22"];
-		levelThirdRobots = ["robot31", "robot32"];
-		levelFourthRobots = ["robot41", "robot42"];
-
 		playGround = new FlxSprite(0, 0).loadGraphic("assets/images/playGround.png", false, 320, 180, false);
 
-		var test:FlxSprite = new FlxSprite(27, 25).makeGraphic(18, 18, FlxColor.WHITE, false);
+		test = new FlxSprite(27, 25).makeGraphic(18, 18, FlxColor.WHITE, false);
+
+		extra = new FlxSprite(27, 75).makeGraphic(18, 18, FlxColor.RED, false);
 
 		add(playGround);
 
 		add(test);
+		add(extra);
 		mainUI = new UI();
 
 		add(UI.allBoughtRobots);
 
 		// (UI.allUnits);
 		add(mainUI); // Next One
+
+		levelOneRobots = ["robot11.png", "robot12.png", "robot13.png", "robot14.png"];
+		levelTwoRobots = ["robot21.png", "robot22.png", "robot23.png", "robot24.png"];
+		levelThirdRobots = ["robot31.png", "robot32.png", "robot33.png", "robot34.png"];
+		levelFourthRobots = ["robot41.png", "robot42.png", "robot43.png", "robot44.png"];
 	}
 
 	function mainLoop()
@@ -87,6 +102,13 @@ class PlayState extends FlxState
 
 			if (currobotCount == 5)
 			{
+				// playGround.visible = false;
+				// UI.allBoughtRobots.visible = false;
+				// extra.visible = false;
+				// test.visible = false;
+
+				rectArea = new FlxSprite(-231, -16).makeGraphic(320, 5000);
+
 				FlxG.camera.shake(0.05, 2, function()
 				{
 					FlxG.camera.fade(FlxColor.BLACK, 2, true, function()
@@ -105,7 +127,7 @@ class PlayState extends FlxState
 			robotMode = "Normal";
 			bgcolor = "Yellow";
 			levelRobots = levelTwoRobots;
-			levelFolder = "level1";
+			levelFolder = "level2";
 			parentLevel = 2;
 
 			if (currobotCount == 20)
@@ -117,10 +139,10 @@ class PlayState extends FlxState
 						trace("2");
 					});
 				});
-			}
 
-			secondLevel = false;
-			thirdLevel = true;
+				secondLevel = false;
+				thirdLevel = true;
+			}
 		}
 
 		if (thirdLevel)
@@ -128,7 +150,7 @@ class PlayState extends FlxState
 			robotMode = "Normal";
 			bgcolor = "Green";
 			levelRobots = levelThirdRobots;
-			levelFolder = "level1";
+			levelFolder = "level3";
 			parentLevel = 3;
 
 			if (currobotCount == 25)
@@ -140,10 +162,10 @@ class PlayState extends FlxState
 						trace("3");
 					});
 				});
-			}
 
-			thirdLevel = false;
-			fourthLevel = true;
+				thirdLevel = false;
+				fourthLevel = true;
+			}
 		}
 
 		if (fourthLevel)
@@ -151,7 +173,7 @@ class PlayState extends FlxState
 			robotMode = "Normal";
 			bgcolor = "Red";
 			levelRobots = levelFourthRobots;
-			levelFolder = "level1";
+			levelFolder = "level4";
 			parentLevel = 4;
 
 			if (currobotCount == 35)
@@ -163,20 +185,28 @@ class PlayState extends FlxState
 						trace("4");
 					});
 				});
-			}
 
-			fourthLevel = false;
+				fourthLevel = false;
+			}
 		}
 	}
+
+	var robotCollided:Bool = false;
 
 	override public function update(elapsed:Float)
 	{
 		super.update(elapsed);
-		mainLoop();
+
+		FlxG.overlap(UI.allBoughtRobots, extra, function(robot:Robot, extra:FlxSprite)
+		{
+			robot.hasEarnedCoin = false;
+		});
 
 		FlxG.overlap(UI.allBoughtRobots, test, function(robot:Robot, touch:FlxSprite)
 		{
-			//
+			robot.earnCoin();
 		});
+
+		mainLoop();
 	}
 }
