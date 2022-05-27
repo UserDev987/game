@@ -1,117 +1,232 @@
 package;
 
+import flixel.FlxCamera;
 import flixel.FlxG;
+import flixel.FlxObject;
 import flixel.FlxSprite;
+import flixel.FlxState;
+import flixel.group.FlxGroup.FlxTypedGroup;
 import flixel.math.FlxPoint;
-import flixel.system.debug.watch.Watch;
 import flixel.util.FlxColor;
-import flixel.util.FlxPath;
-import flixel.util.FlxTimer;
 
-using StringTools;
-
-class Robot extends FlxSprite
+class PlayState extends FlxState
 {
-	var defPos:FlxPoint = new FlxPoint(27, 119);
+	var playGround:FlxSprite;
 
-	public var speed:Int;
-	public var spl:Int;
-	public var lastTouched:Bool;
-	public var curRobotFolder:String;
+	var mainUI:UI;
 
-	public static var price:Int;
+	public static var score:Int;
 
-	public var touched:Dynamic;
+	var ball:Robot;
 
-	public static var thisRobotMode:String;
+	public static var currobotCount:Int;
 
-	public static var pathh:String;
+	public static var test:FlxSprite;
 
-	public var _frames:Array<Int>;
+	public static var extra:FlxSprite;
 
-	public var hasEarnedCoin:Bool;
+	public var curSpeed:Int;
+	public var curPrice:Int;
 
-	public function new(speed:Int, _path:String, _price:Int, ?spl:Int)
+	// responsible for handling level stuff
+	public static var firstLevel:Bool;
+	public static var secondLevel:Bool;
+	public static var thirdLevel:Bool;
+	public static var fourthLevel:Bool;
+
+	// level stuff
+	public static var robotMode:String;
+	public static var bgcolor:String;
+	public static var levelFolder:String;
+	public static var currLevelDone:Bool;
+	public static var levelRobots:FlxTypedGroup<Robot>;
+
+	public var folder:String;
+
+	// shit
+	public var shit:FlxSprite;
+
+	// level robots
+	public static var _levelOneRobots:Array<String>; // <= loop through folder names as strings and load them
+	public static var _levelTwoRobots:Array<String>;
+	public static var _levelThirdRobots:Array<String>;
+	public static var _levelFourthRobots:Array<String>;
+
+	// god some mercy please
+	public static var levelOneRobots:FlxTypedGroup<Robot>; // <= loop through folder names as strings and load them
+	public static var levelTwoRobots:FlxTypedGroup<Robot>;
+	public static var levelThirdRobots:FlxTypedGroup<Robot>;
+	public static var levelFourthRobots:FlxTypedGroup<Robot>;
+
+	public static var parentLevel:Int;
+
+	public var rectArea:FlxSprite;
+
+	override public function create()
 	{
-		super(defPos.x, defPos.y); // Default at bottom left of the PG
+		super.create();
 
-		this.curRobotFolder = PlayState.levelFolder;
+		firstLevel = true;
 
-		pathh = _path;
+		_levelOneRobots = ["robot11.png", "robot12.png", "robot13.png", "robot14.png"];
+		_levelTwoRobots = ["robot21.png", "robot22.png", "robot23.png", "robot24.png"];
+		_levelThirdRobots = ["robot31.png", "robot32.png", "robot33.png", "robot34.png"];
+		_levelFourthRobots = ["robot41.png", "robot42.png", "robot43.png", "robot44.png"];
 
-		if (pathh.contains("3") || pathh.contains("4"))
+		levelOneRobots = new FlxTypedGroup<Robot>();
+
+		for (robot in _levelOneRobots)
 		{
-			this.loadGraphic('assets/images/$curRobotFolder/$pathh', true, 27, 16);
-		}
-		else
-		{
-			this.loadGraphic('assets/images/$curRobotFolder/$pathh', true, 18, 18);
-		}
-
-		// this.makeGraphic(18, 18, FlxColor.WHITE);
-
-		FlxG.watch.addQuick("fullString", 'assets/images/$curRobotFolder/$pathh');
-
-		this.speed = speed;
-
-		price = _price;
-
-		this.spl = spl;
-
-		this.handleFrames();
-		this.setPath();
-	}
-
-	function handleFrames()
-	{
-		this.animation.add("0", [0], 6, false);
-		this.animation.add("1", [1], 6, false);
-		this.animation.add("2", [2], 6, false);
-		this.animation.add("3", [3], 6, false);
-	}
-
-	function setPath()
-	{
-		var points:Array<FlxPoint> = [
-			new FlxPoint(37, 129),
-			new FlxPoint(37, 35),
-			new FlxPoint(276, 35),
-			new FlxPoint(276, 129)
-		];
-		var path = new FlxPath(points);
-
-		this.path = path;
-
-		path.start(points, speed, FlxPath.LOOP_FORWARD);
-	}
-
-	function handleTouch() {}
-
-	public function earnCoin()
-	{
-		if (!hasEarnedCoin)
-		{
-			hasEarnedCoin = true;
-			PlayState.score++;
-		}
-	}
-
-	var animTimeTracker:Float = 0;
-	var curAnimIndex:Int = 0;
-
-	override function update(elapsed:Float):Void
-	{
-		animTimeTracker += elapsed;
-		if (animTimeTracker >= 0.5) // replace 10.0 with the value when you want them to change
-		{
-			if (curAnimIndex > 3)
-				curAnimIndex = 0;
-
-			animation.play(Std.string(curAnimIndex));
-			curAnimIndex++;
-			animTimeTracker = 0;
+			levelOneRobots.add(new Robot(50, robot, 50));
 		}
 
+		// FlxG.debugger.visible = true;
+
+		getPG();
+	}
+
+	function getPG()
+	{
+		playGround = new FlxSprite(0, 0).loadGraphic("assets/images/playGround.png", false, 320, 180, false);
+
+		test = new FlxSprite(27, 25).makeGraphic(18, 18, FlxColor.WHITE, false);
+
+		extra = new FlxSprite(27, 75).makeGraphic(18, 18, FlxColor.RED, false);
+
+		add(playGround);
+
+		add(test);
+		add(extra);
+		mainUI = new UI();
+
+		add(UI.allBoughtRobots);
+
+		// (UI.allUnits);
+		add(mainUI); // Next One
+	}
+
+	function mainLoop()
+	{
+		if (firstLevel)
+		{
+			FlxG.watch.addQuick("curSpeed", curSpeed);
+			FlxG.watch.addQuick("curPrice", curPrice);
+
+			levelFolder = "level1";
+			robotMode = "Normal";
+			bgcolor = "Purple";
+			levelRobots = levelOneRobots;
+			parentLevel = 1;
+
+			if (currobotCount == 5)
+			{
+				// playGround.visible = false;
+				// UI.allBoughtRobots.visible = false;
+				// extra.visible = false;
+				// test.visible = false;
+
+				rectArea = new FlxSprite(-231, -16).makeGraphic(320, 5000);
+
+				FlxG.camera.shake(0.05, 2, function()
+				{
+					FlxG.camera.fade(FlxColor.BLACK, 2, true, function()
+					{
+						trace("1");
+					});
+				});
+
+				firstLevel = false;
+				secondLevel = true;
+			}
+		}
+
+		if (secondLevel)
+		{
+			robotMode = "Normal";
+			bgcolor = "Yellow";
+			levelRobots = levelTwoRobots;
+			levelFolder = "level2";
+			parentLevel = 2;
+
+			if (currobotCount == 20)
+			{
+				FlxG.camera.shake(0.05, 2, function()
+				{
+					FlxG.camera.fade(FlxColor.BLACK, 2, true, function()
+					{
+						trace("2");
+					});
+				});
+
+				secondLevel = false;
+				thirdLevel = true;
+			}
+		}
+
+		if (thirdLevel)
+		{
+			robotMode = "Normal";
+			bgcolor = "Green";
+			levelRobots = levelThirdRobots;
+			levelFolder = "level3";
+			parentLevel = 3;
+
+			if (currobotCount == 25)
+			{
+				FlxG.camera.shake(0.05, 2, function()
+				{
+					FlxG.camera.fade(FlxColor.BLACK, 2, true, function()
+					{
+						trace("3");
+					});
+				});
+
+				thirdLevel = false;
+				fourthLevel = true;
+			}
+		}
+
+		if (fourthLevel)
+		{
+			robotMode = "Normal";
+			bgcolor = "Red";
+			levelRobots = levelFourthRobots;
+			levelFolder = "level4";
+			parentLevel = 4;
+
+			if (currobotCount == 35)
+			{
+				FlxG.camera.shake(0.05, 2, function()
+				{
+					FlxG.camera.fade(FlxColor.BLACK, 2, true, function()
+					{
+						trace("4");
+					});
+				});
+
+				fourthLevel = false;
+			}
+		}
+	}
+
+	var robotCollided:Bool = false;
+
+	override public function update(elapsed:Float)
+	{
 		super.update(elapsed);
+
+		FlxG.overlap(UI.allBoughtRobots, extra, function(robot:Robot, extra:FlxSprite)
+		{
+			robot.hasEarnedCoin = false;
+		});
+
+		FlxG.overlap(UI.allBoughtRobots, test, function(robot:Robot, touch:FlxSprite)
+		{
+			robot.earnCoin();
+		});
+
+		folder = levelFolder;
+
+		mainLoop();
 	}
 }
