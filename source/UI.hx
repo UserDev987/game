@@ -26,6 +26,7 @@ class UI extends FlxTypedGroup<FlxSprite>
 
 	public static var allBoughtRobots:FlxTypedGroup<Robot>;
 	public static var allUnits:FlxTypedGroup<FlxSprite>;
+	public static var rbt:Robot;
 
 	public function new()
 	{
@@ -69,14 +70,16 @@ class UI extends FlxTypedGroup<FlxSprite>
 	function addBot()
 	{
 		var randomRobot:Int = new FlxRandom().int(0, 3);
-		var realRandomRobot:String = PlayState.levelRobots[randomRobot];
+		var realRandomRobot:Robot = PlayState.levelRobots.getRandom();
 
-		allBoughtRobots.add(new Robot(50, realRandomRobot, 50));
+		// rbt = new Robot(50, realRandomRobot, 50);
 
-		trace(PlayState.levelRobots[randomRobot]);
-		trace(PlayState.levelFolder);
+		allBoughtRobots.add(realRandomRobot);
 
 		PlayState.currobotCount += 1;
+
+		FlxG.watch.addQuick("randomValue", randomRobot);
+		FlxG.watch.addQuick("randomRobotString", realRandomRobot);
 
 		// var randomUnit:FlxSprite = allUnits.getRandom();
 
