@@ -6,6 +6,7 @@ import flixel.FlxSprite;
 import flixel.group.FlxGroup.FlxTypedGroup;
 import flixel.input.mouse.FlxMouseEventManager;
 import flixel.math.FlxRandom;
+import flixel.text.FlxText;
 import flixel.util.FlxColor;
 
 typedef Unit =
@@ -26,11 +27,15 @@ class UI extends FlxTypedGroup<FlxSprite>
 
 	public static var allBoughtRobots:FlxTypedGroup<Robot>;
 	public static var allUnits:FlxTypedGroup<FlxSprite>;
+
 	public static var rbt:Robot;
+
+	public var robotTurn:Int = 0;
 
 	public function new()
 	{
 		super();
+
 		allBoughtRobots = new FlxTypedGroup<Robot>();
 		allUnits = new FlxTypedGroup<FlxSprite>();
 		invButton = new FlxSprite(289, 90).loadGraphic("assets/images/inventory_button_off.png", false, 20, 20);
@@ -69,17 +74,37 @@ class UI extends FlxTypedGroup<FlxSprite>
 
 	function addBot()
 	{
-		var randomRobot:Int = new FlxRandom().int(0, 3);
-		var realRandomRobot:Robot = PlayState.levelRobots.getRandom();
+		FlxG.watch.addQuick("robotTurn", robotTurn);
+		if (robotTurn != PlayState.levelRobots.length + 1)
+		{
+			if (PlayState.score >= PlayState.levelRobots.members[robotTurn].price)
+			{
+				PlayState.score -= PlayState.levelRobots.members[robotTurn].price;
+				PlayState.incr(PlayState.score -= PlayState.levelRobots.members[robotTurn].price, PlayState.scoreT);
+				// rbt = new Robot(50, realRandomRobot, 50);
 
-		// rbt = new Robot(50, realRandomRobot, 50);
+				var realRandomRobot:Robot = PlayState.levelRobots.members[robotTurn];
 
-		allBoughtRobots.add(realRandomRobot);
+				allBoughtRobots.add(realRandomRobot);
 
-		PlayState.currobotCount += 1;
+				robotTurn++;
 
-		FlxG.watch.addQuick("randomValue", randomRobot);
-		FlxG.watch.addQuick("randomRobotString", realRandomRobot);
+				PlayState.currobotCount += 1;
+
+				// FlxG.watch.addQuick("randomValue", randomRobot);
+				FlxG.watch.addQuick("robotParentFolder", realRandomRobot.levelfld);
+				FlxG.watch.addQuick("robotPng", realRandomRobot.pathh);
+			}
+			else
+			{
+				trace("Damn! You got no money loser!");
+			}
+		}
+
+		if (robotTurn == PlayState.levelRobots.length + 1)
+		{
+			robotTurn = 0;
+		}
 
 		// var randomUnit:FlxSprite = allUnits.getRandom();
 
@@ -112,7 +137,6 @@ class UI extends FlxTypedGroup<FlxSprite>
 	override public function update(elapsed:Float)
 	{
 		super.update(elapsed);
-
-		// trace(allBoughtRobots.members.length);
+		FlxG.watch.addQuick("curLevel", PlayState.parentLevel);
 	}
 }
