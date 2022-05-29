@@ -19,42 +19,46 @@ class Robot extends FlxSprite
 	public var lastTouched:Bool;
 	public var curRobotFolder:String;
 
-	public static var price:Int;
+	public var price:Int;
 
 	public var touched:Dynamic;
 
 	public static var thisRobotMode:String;
 
-	public static var pathh:String;
+	public var pathh:String;
 
 	public var _frames:Array<Int>;
 
 	public var hasEarnedCoin:Bool;
 
-	public function new(speed:Int, _path:String, _price:Int, ?spl:Int)
+	public var levelfld:Int;
+
+	public function new(speed:Int, _path:String, _price:Int, fld:Int, ?spl:Int)
 	{
 		super(defPos.x, defPos.y); // Default at bottom left of the PG
 
-		this.curRobotFolder = PlayState.levelFolder;
+		this.levelfld = fld;
+
+		// this.curRobotFolder = PlayState.folder;
 
 		pathh = _path;
 
 		if (pathh.contains("3") || pathh.contains("4"))
 		{
-			this.loadGraphic('assets/images/$curRobotFolder/$pathh', true, 27, 16);
+			this.loadGraphic('assets/images/$levelfld/$pathh', true, 27, 16);
 		}
 		else
 		{
-			this.loadGraphic('assets/images/$curRobotFolder/$pathh', true, 16, 16);
+			this.loadGraphic('assets/images/$levelfld/$pathh', true, 18, 18);
 		}
 
 		// this.makeGraphic(18, 18, FlxColor.WHITE);
 
-		FlxG.watch.addQuick("fullString", 'assets/images/$curRobotFolder/$pathh');
+		FlxG.watch.addQuick("fullString", 'assets/images/$levelfld/$pathh');
 
 		this.speed = speed;
 
-		price = _price;
+		this.price = _price;
 
 		this.spl = spl;
 
@@ -85,14 +89,13 @@ class Robot extends FlxSprite
 		path.start(points, speed, FlxPath.LOOP_FORWARD);
 	}
 
-	function handleTouch() {}
-
 	public function earnCoin()
 	{
 		if (!hasEarnedCoin)
 		{
 			hasEarnedCoin = true;
-			PlayState.score++;
+			PlayState.score += price;
+			PlayState.incr(PlayState.score += price, PlayState.scoreT);
 		}
 	}
 
